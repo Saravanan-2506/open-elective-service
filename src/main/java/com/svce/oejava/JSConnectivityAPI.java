@@ -25,6 +25,7 @@ public class JSConnectivityAPI {
         put("2024ch0699@svce.ac.in", "password8");
         put("2024ce0676@svce.ac.in", "password9");
         put("2024ae0366@svce.ac.in", "password10");
+        put("2024ae0367@svce.ac.in", "password12");
     }};
 
     // POST /api/auth/login
