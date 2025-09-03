@@ -9,8 +9,14 @@ public class courseSelection {
     private int capacity;
     private int enrolled;
 
-    public courseSelection(int id, String title, String code, 
-    		String instructor,String department, int capacity, int enrolled) {
+    // new fields
+    private String restricted;  // e.g. "IT,CS" or blank
+    private boolean full;       // true if enrolled >= capacity
+    private boolean disabled;   // true if restricted OR full
+
+    public courseSelection(int id, String title, String code,
+                           String instructor, String department,
+                           int capacity, int enrolled, String restricted) {
         this.id = id;
         this.title = title;
         this.code = code;
@@ -18,7 +24,12 @@ public class courseSelection {
         this.department = department;
         this.capacity = capacity;
         this.enrolled = enrolled;
+        this.restricted = restricted;
+        this.full = false;
+        this.disabled = false;
     }
+
+    // getters/setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -39,4 +50,17 @@ public class courseSelection {
 
     public int getEnrolled() { return enrolled; }
     public void setEnrolled(int enrolled) { this.enrolled = enrolled; }
+
+    public String getRestricted() { return restricted; }
+    public void setRestricted(String restricted) { this.restricted = restricted; }
+
+    public boolean isFull() { return full; }
+    public void setFull(boolean full) { this.full = full; }
+
+    public boolean isDisabled() { return disabled; }
+    public void setDisabled(boolean disabled) { this.disabled = disabled; }
+
+    // extra getters (frontend compatibility)
+    public String getName() { return title; }
+    public String getDescription() { return "Instructor: " + (instructor == null ? "" : instructor); }
 }
