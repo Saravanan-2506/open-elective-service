@@ -94,8 +94,7 @@ public class ExcelService {
 
     /**
      * Save enrollment and increment course's enrolled count in runtime Courses.xlsx
-     * Now: prevents duplicate enrollment of same student into the same course,
-     * but allows the same student to enroll into different courses.
+     * Now: prevents student from enrolling in multiple courses (only one allowed).
      *
      * Synchronized to avoid concurrent file writes from multiple threads.
      */
@@ -111,16 +110,25 @@ public class ExcelService {
                 }
                 enrollSheet = enrollWb.getSheetAt(0);
 
-                // Check for duplicate (rollNo + courseCode)
+                // ✅ Check for any previous enrollment by this roll number
                 for (Row r : enrollSheet) {
                     if (r.getRowNum() == 0) continue; // skip header
                     String existingRoll = getString(r, 0);
                     String existingCourseCode = getString(r, 3);
-                    if (existingRoll.equalsIgnoreCase(rollNo)
-                            && existingCourseCode.equalsIgnoreCase(selectedCourse.getCode())) {
-                        enrollWb.close();
-                        return "⚠️ Student with Roll No " + rollNo +
-                               " has already enrolled in " + selectedCourse.getTitle() + "!";
+                    String existingCourseTitle = getString(r, 4);
+
+                    if (existingRoll.equalsIgnoreCase(rollNo)) {
+                        // If same course, block duplicate
+                        if (existingCourseCode.equalsIgnoreCase(selectedCourse.getCode())) {
+                            enrollWb.close();
+                            return "⚠️ Student with Roll No " + rollNo +
+                                   " has already enrolled in " + selectedCourse.getTitle() + "!";
+                        } else {
+                            // If different course, block multiple course selection
+                            enrollWb.close();
+                            return "❌ Student with Roll No " + rollNo +
+                                   " has already enrolled in another course (" + existingCourseTitle + ").";
+                        }
                     }
                 }
 
@@ -136,6 +144,7 @@ public class ExcelService {
                 header.createCell(4).setCellValue("Course Title");
             }
 
+            // ✅ If no enrollment exists yet, allow adding
             int last = enrollSheet.getLastRowNum();
             Row row = enrollSheet.createRow(last + 1);
             row.createCell(0).setCellValue(rollNo);

@@ -58,6 +58,13 @@ public class courseSelectionController {
     // Save enrollment and update counts
     @PostMapping("/api/enroll")
     public String enrollStudent(@RequestBody EnrollmentRequest request) {
+        // ✅ 1. Check if already enrolled using roll number
+        List<courseSelection> already = excelService.getEnrolledCoursesByRoll(request.getRollNo());
+        if (already != null && !already.isEmpty()) {
+            return "❌ You have already enrolled in: " + already.get(0).getTitle();
+        }
+
+        // ✅ 2. Continue with normal enrollment
         List<courseSelection> courses = excelService.getCourses();
 
         courseSelection selectedCourse = courses.stream()
@@ -65,10 +72,10 @@ public class courseSelectionController {
                 .findFirst()
                 .orElse(null);
 
-        if (selectedCourse == null) return "Course not found!";
+        if (selectedCourse == null) return "❌ Course not found!";
 
         if (selectedCourse.getEnrolled() >= selectedCourse.getCapacity()) {
-            return "Course is already full!";
+            return "⚠️ Course is already full!";
         }
 
         return excelService.saveEnrollment(
